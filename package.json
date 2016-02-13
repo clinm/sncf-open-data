@@ -3,7 +3,8 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "test": "mocha test --recursive"
+    "test": "mocha test --recursive",
+    "start": "node ./bin/www"
   },
   "dependencies": {
     "async": "^1.5.2",
