@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Stations</title>
+    <link rel="stylesheet" href="public/leaflet/leaflet.css">
+
+</head>
+<body>
+<h1>Display all stations recorded in the API</h1>
+<p>All records are stored in json/all_stations_wihtout_filter.json</p>
+<p>It takes time to retrieve them as there are more than 75000 lines !</p>
+<div id="map" style="width: 100%; height: 500px;"></div>
+
+<script src="public/leaflet/leaflet.js"></script>
+<script>
+    // set up the map
+    map = new L.Map('map');
+
+    // create the tile layer with correct attribution
+    var osmUrl='http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+    var osmAttrib='Map data © <a href="http://openstreetmap.org">OpenStreetMap</a> contributors';
+    var osm = new L.TileLayer(osmUrl, {minZoom: 2, maxZoom: 12, attribution: osmAttrib});
+
+    // roughly center of France
+    map.setView(new L.LatLng(46.6, 2.75), 5);
+    map.addLayer(osm);
+
+    var xmlhttp = new XMLHttpRequest();
+    var url = "./json/all_stations_without_filter.json";
+
+    xmlhttp.onreadystatechange = function() {
+        if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+            var stations = JSON.parse(xmlhttp.responseText);
+            stations.forEach(function(stopArea){
+                L.marker(stopArea.coord).addTo(map);
+            });
+        }
+    };
+    xmlhttp.open("GET", url, true);
+    xmlhttp.send();
+
+</script>
+</body>
+</html>
