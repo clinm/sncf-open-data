@@ -2,5 +2,7 @@
   // Key received after registering on https://data.sncf.com/api
   "KEY": "my_private_key",
   // Base end point of the remote api
-  "BASE_URL": "api.sncf.com/v1/coverage/sncf"
+  "BASE_URL": "api.sncf.com/v1/coverage/sncf",
+  // Base directory where resources will be store. path is from project's dir
+  "BASE_RESOURCES" : "./resources"
 }

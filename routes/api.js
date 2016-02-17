@@ -7,10 +7,14 @@ exports.index = function(req, res){
 };
 
 exports.stop_areas = function(req, res){
-    var sncf = require('../bin/remote-request/sncf-request');
+    var countryStations = require('../bin/countryStations');
 
-    sncf.getAll("/stop_areas", {}, function(error, response, message){
-        res.json(message);
+    countryStations.getResources({}, function(resource){
+        if(typeof resource === 'string'){
+            res.json(require(resource));
+        }else{
+            res.send(resource);
+        }
     });
 };
 
