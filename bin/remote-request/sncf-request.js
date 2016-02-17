@@ -88,10 +88,6 @@ var sncfRequest = function(){
                         elt = sncf.cleanResponse(elt);
                         return memo.concat(elt[Object.keys(elt)[0]]);
                     }, seed);
-                }else{
-                    console.log("sncf errro");
-                    console.log(error);
-                    console.log(result);
                 }
                 callback(error, null, result);
             });
@@ -115,6 +111,8 @@ var sncfRequest = function(){
                     var data = JSON.parse(body);
                     var total = data.pagination.total_result;
                     if(data.pagination.items_on_page === total){
+                        body = sncf.cleanResponse(body);
+                        body = body[Object.keys(body)[0]];
                         callback(error, response, body);
                     }else{
                         // compute how many request have to be sent

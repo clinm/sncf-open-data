@@ -75,6 +75,17 @@ describe("Basic behaviour", function(){
             });
         });
 
+        it("should clean request", function(done){
+            var expected = [{message: "Hello"}];
+            var response = {pagination: {items_on_page: 30, total_result: 30}, content:expected};
+            spy.yields(null, {statusCode: 200}, JSON.stringify(response));
+
+            sncf.getAll("dummy", {}, function(error, response, body){
+                expect(body).to.be.deep.equal(expected);
+                done();
+            });
+        });
+
         it("should perform all requests needed (total = k*1000 + r)", function(done){
             // should have 1 request at the beginning and then 3 more
             // 1*1000 + (2*1000 + 1*15) = 3015
