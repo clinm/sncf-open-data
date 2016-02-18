@@ -4,18 +4,22 @@
     <meta charset="UTF-8">
     <title>Stations</title>
     <link rel="stylesheet" href="public/leaflet/leaflet.css">
+    <link rel="stylesheet" href="public/leaflet/markercluster/MarkerCluster.css">
+    <link rel="stylesheet" href="public/leaflet/markercluster/MarkerCluster.Default.css">
 
 </head>
 <body>
 <h1>Display all stations recorded in the API</h1>
-<p>All records are stored in json/all_stations_wihtout_filter.json</p>
+<p>All records are stored in resources/stations/stations.json</p>
 <p>It takes time to retrieve them as there are more than 75000 lines !</p>
 <div id="map" style="width: 100%; height: 500px;"></div>
 
+
 <script src="public/leaflet/leaflet.js"></script>
+<script src="public/leaflet/markercluster/leaflet.markercluster.js"></script>
 <script>
     // set up the map
-    map = new L.Map('map');
+    map = new L.map('map');
 
     // create the tile layer with correct attribution
     var osmUrl='http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
@@ -27,14 +31,21 @@
     map.addLayer(osm);
 
     var xmlhttp = new XMLHttpRequest();
-    var url = "./json/all_stations_without_filter.json";
+    var url = "./resources/stations/stations.json";
 
     xmlhttp.onreadystatechange = function() {
+        var markerClusters = L.markerClusterGroup();
+
         if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
             var stations = JSON.parse(xmlhttp.responseText);
+
             stations.forEach(function(stopArea){
-                L.marker(stopArea.coord).addTo(map);
+                var content = stopArea.name || "Undefined";
+                var m = L.marker(stopArea.coord).bindPopup(content);
+                markerClusters.addLayer(m);
             });
+
+            map.addLayer(markerClusters);
         }
     };
     xmlhttp.open("GET", url, true);
