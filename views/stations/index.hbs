@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <title>Stations</title>
     <link rel="stylesheet" href="leaflet/leaflet.css">
-
+    <link rel="stylesheet" href="leaflet/markercluster/MarkerCluster.css">
+    <link rel="stylesheet" href="leaflet/markercluster/MarkerCluster.Default.css">
 </head>
 <body>
 <h1>Display all stations recorded in the API</h1>
@@ -12,9 +13,10 @@
 <div id="map" style="width: 100%; height: 500px;"></div>
 
 <script src="leaflet/leaflet.js"></script>
+<script src="leaflet/markercluster/leaflet.markercluster.js"></script>
 <script>
     // set up the map
-    map = new L.Map('map');
+    map = new L.map('map');
 
     // create the tile layer with correct attribution
     var osmUrl='http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
@@ -29,11 +31,18 @@
     var url = "/api/stop_areas";
 
     xmlhttp.onreadystatechange = function() {
+        var markerClusters = L.markerClusterGroup();
+
         if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
             var stations = JSON.parse(xmlhttp.responseText);
+
             stations.forEach(function(stopArea){
-                L.marker(stopArea.coord).addTo(map);
+                var content = stopArea.name || "Undefined";
+                var m = L.marker(stopArea.coord).bindPopup(content);
+                markerClusters.addLayer(m);
             });
+
+            map.addLayer(markerClusters);
         }
     };
     xmlhttp.open("GET", url, true);
