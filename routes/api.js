@@ -9,12 +9,9 @@ exports.index = function(req, res){
 exports.stop_areas = function(req, res){
     var countryStations = require('../bin/countryStations');
 
-    countryStations.getResources({}, function(resource){
-        if(typeof resource === 'string'){
-            res.json(require(resource));
-        }else{
-            res.send(resource);
-        }
+    countryStations.getResources(req.query, function(resource){
+        console.log("length: " + resource.length);
+        res.send(resource);
     });
 };
 

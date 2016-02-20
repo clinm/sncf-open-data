@@ -17,19 +17,15 @@ var countryStation = function(){
     var obj = {
         /**
          *  Construct the path to the resources given parameters
-         * @param {{stationsType: []}}params use stationsType to create the path
+         * @param {{stationsType: []} | {}}params use stationsType to create the path
          * @returns {string}
          */
         getPath: function(params){
             var res = path.join(__dirname, '../', CONF.BASE_RESOURCES, COUNTRY_BASE, COUNTRY_BASE);
-            if(params && params.stationsType && params.stationsType.length > 0){
-                //clean params.stationsType
-                var args = _.intersection(params.stationsType, ['a', 'b', 'c']);
-                args = _.unique(args).sort(function(a, b){
-                    return (a <= b)? (a < b)? -1: 0: 1;
-                });
+            params = obj.cleanParams(params);
+            if(params.stationsType.length > 0){
 
-                var types = args.join(SEP);
+                var types = params.stationsType.join(SEP);
                 res = res + SEP + types;
             }
             return res + '.json';
@@ -39,21 +35,28 @@ var countryStation = function(){
          *  make requests, store the results and return the resource. Result is sent to callback.
          * @param params
          * @param callback take one argument which will be the result (see @returns)
-         * @returns {string | []} returns a strings if the resource is on disk
-         *                        the resource itself if a request was performed
+         * @returns {[]}    Returns the requested resources (which was filtered with params)
          */
         getResources: function(params, callback){
-            var pathToResources = obj.getPath(params);
+            params = obj.cleanParams(params);
+
+            var pathToResources = obj.getPath({});
             if(fs.existsSync(pathToResources)){
-                callback(pathToResources);
+                var resource = require(pathToResources);
+                callback(obj.doFilter(params, resource));
             }else{
                 sncf.getAll('stop_areas', {}, function(error, response, message){
-                    fs.writeFileSync(pathToResources, JSON.stringify(obj.doFilter(params, message)));
+                    // we store unfiltered data in order to be able to perform any filter
+                    // in the future
+                    fs.writeFileSync(pathToResources, JSON.stringify(message));
+
+                    message = obj.doFilter(params, message);
                     callback(message);
                 });
             }
         },
         doFilter: function(params, resources){
+            params = obj.cleanParams(params);
             resources = _.filter(resources, function(elt){
                 if(!elt.coord){
                     return false;
@@ -61,10 +64,39 @@ var countryStation = function(){
                 if(elt.coord && elt.coord.lat === '0.0' && elt.coord.lon === '0.0'){
                     return false;
                 }
+
+                // filter by name
+                if(params.name && !elt.name.match(params.name)){
+                    return false;
+                }
                 return true;
             });
 
             return resources;
+        },
+        cleanParams: function(params){
+            var cleanedParams = {};
+            var args = [];
+
+            if(params){
+                if(params.stationsType){
+                    //clean params.stationsType
+                    args = _.intersection(params.stationsType, ['a', 'b', 'c']);
+                    args = _.unique(args).sort(function(a, b){
+                        return (a <= b)? (a < b)? -1: 0: 1;
+                    });
+
+                }
+
+                // name parameters
+
+                if(params.name && typeof params.name === 'string'){
+                    cleanedParams.name = params.name;
+                }
+            }
+            cleanedParams.stationsType = args;
+
+            return cleanedParams;
         }
     };
 
