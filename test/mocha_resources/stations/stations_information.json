@@ -1,0 +1,25 @@
+[{
+  "name": "gare de Metz-Ville",
+  "links": [],
+  "coord": {
+    "lat": "49.109759",
+    "lon": "6.177198"
+  },
+  "label": "gare de Metz-Ville (Metz)",
+  "administrative_regions": [
+    {
+      "insee": "57463",
+      "name": "Metz",
+      "level": 8,
+      "coord": {
+        "lat": "49.119698",
+        "lon": "6.176355"
+      },
+      "label": "Metz (57000-57070)",
+      "id": "admin:450381extern",
+      "zip_code": "57000;57070"
+    }
+  ],
+  "timezone": "Europe/Paris",
+  "id": "stop_area:OCE:SA:87192039"
+}]

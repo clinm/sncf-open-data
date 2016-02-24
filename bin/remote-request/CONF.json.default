@@ -4,5 +4,7 @@
   // Base end point of the remote api
   "BASE_URL": "api.sncf.com/v1/coverage/sncf",
   // Base directory where resources will be store. path is from project's dir
-  "BASE_RESOURCES" : "./resources"
+  "BASE_RESOURCES" : "./resources",
+  // Information on station should come from //TODO
+  "STATIONS_INFORMATION": "resources/stations/stations_information.json"
 }

@@ -97,7 +97,11 @@ describe("CountryStationsTest", function(){
 
         it("should perform request and store results", function(done){
             spy.yields(null, {statusCode: 200}, JSON.stringify(expected));
+            var associate = sandbox.stub(countryStations, 'associate', function(e){return e;});
+            var filter = sandbox.stub(countryStations, 'doFilter', function(params, values){return values;});
             countryStations.getResources({}, function(result){
+                expect(associate.callCount).to.be.equal(1);
+                expect(filter.callCount).to.be.equal(1);
                 expect(spy.callCount).to.be.equal(1);
                 expect(result).to.be.deep.equal(expected.stop_areas);
                 done();
@@ -107,8 +111,10 @@ describe("CountryStationsTest", function(){
         it("should retrieve data from previous request", function(done){
             //noinspection JSCheckFunctionSignatures
             var res = require(countryStations.getPath());
+            var filter = sandbox.stub(countryStations, 'doFilter', function(params, values){return values;});
             countryStations.getResources({}, function(result){
                 expect(spy.callCount).to.be.equal(0);
+                expect(filter.callCount).to.be.equal(1);
                 expect(result).to.be.deep.equal(res);
                 done();
             });
@@ -159,9 +165,94 @@ describe("CountryStationsTest", function(){
             expect(res.length).to.be.equal(dataUnfiltered.length);
 
         });
+
+        var stationInfo = {
+            "datasetid": "referentiel-gares-voyageurs",
+            "recordid": "012455250769df86afca0a59cb19c80d923df1ac",
+            "fields": {
+                "departement": "Moselle",
+                "commune": "Metz",
+                "uic": "0087192039",
+                "segment_drg": "a",
+                "region": "Lorraine",
+                "nombre_plateformes": "1",
+                "niveau_de_service": "3",
+                "intitule_gare": "Metz Ville",
+                "code_postal": "57000"
+            }
+        };
+
+        var resource = [{
+            "name": "gare de Metz-Ville",
+            "links": [],
+            "coord": {
+                "lat": "49.109759",
+                "lon": "6.177198"
+            },
+            "label": "gare de Metz-Ville (Metz)",
+            "administrative_regions": [
+                {
+                    "insee": "57463",
+                    "name": "Metz",
+                    "level": 8,
+                    "coord": {
+                        "lat": "49.119698",
+                        "lon": "6.176355"
+                    },
+                    "label": "Metz (57000-57070)",
+                    "id": "admin:450381extern",
+                    "zip_code": "57000;57070"
+                }
+            ],
+            "timezone": "Europe/Paris",
+            "id": "stop_area:OCE:SA:87192039",
+            "fields": {
+                "departement": "Moselle",
+                "commune": "Metz",
+                "uic": "0087192039",
+                "segment_drg": "a",
+                "region": "Lorraine",
+                "nombre_plateformes": "1",
+                "niveau_de_service": "3",
+                "intitule_gare": "Metz Ville",
+                "code_postal": "57000"
+            }
+
+        }];
+
+        it("should filter using fields and keep", function(){
+            Object.keys(stationInfo.fields).forEach(function(elt){
+                var res = countryStations.doFilter({fields: {elt: stationInfo.fields[elt]}}, resource);
+                expect(res).to.be.deep.equal(res);
+            });
+        });
+
+        it("should filter using fields and not keep", function(){
+            var stationInfo = {
+                "fields": {
+                    "departement": "Incorrect",
+                    "commune": "Incorrect",
+                    "uic": "Incorrect",
+                    "segment_drg": "Incorrect",
+                    "region": "Incorrect",
+                    "nombre_plateformes": "Incorrect",
+                    "niveau_de_service": "Incorrect",
+                    "intitule_gare": "Incorrect",
+                    "code_postal": "Incorrect"
+                }
+            };
+            Object.keys(stationInfo.fields).forEach(function(elt){
+                var params = {fields: {}};
+                params.fields[elt] = stationInfo.fields[elt];
+                var res = countryStations.doFilter(params, resource);
+                expect(res).to.be.deep.equal([]);
+            });
+        });
     });
 
     describe("cleanParams", function(){
+        var defaultRes  = {stationsType: [], fields: {}};
+
         describe("stationsType", function(){
             it("should not put twice the same arguments", function(){
                 var stationsType = countryStations.cleanParams({stationsType: ['a', 'b', 'a']}).stationsType;
@@ -182,31 +273,73 @@ describe("CountryStationsTest", function(){
 
         describe("unknown filters", function(){
             it("should not take unknown filters", function(){
-                var stationsType = countryStations.cleanParams({Something:['b', 'a']});
-                expect(stationsType).to.be.deep.equal({stationsType:[]});
+                var params = countryStations.cleanParams({Something:['b', 'a']});
+                expect(params).to.be.deep.equal(defaultRes);
             });
 
             it("should handle empty parameter", function(){
-                var stationsType = countryStations.cleanParams();
-                expect(stationsType).to.be.deep.equal({stationsType:[]});
+                var params = countryStations.cleanParams();
+                expect(params).to.be.deep.equal(defaultRes);
             });
         });
 
         describe("name", function(){
             it("should take name if exists", function(){
-                var stationsType = countryStations.cleanParams({name: "Station name"});
-                expect(stationsType).to.be.deep.equal({stationsType:[], name: "Station name"});
+                var expected = {};
+                Object.assign(expected, defaultRes);
+                expected.name = "Station name";
+
+                var params = countryStations.cleanParams({name: "Station name"});
+                expect(params).to.be.deep.equal(expected);
             });
 
             it("should not take name if it is something else than string", function(){
-                var stationsType = countryStations.cleanParams({name: ["value"]});
-                expect(stationsType).to.be.deep.equal({stationsType:[]});
+                var params = countryStations.cleanParams({name: ["value"]});
+                expect(params).to.be.deep.equal(defaultRes);
 
-                stationsType = countryStations.cleanParams({name: {}});
-                expect(stationsType).to.be.deep.equal({stationsType:[]});
+                params = countryStations.cleanParams({name: {}});
+                expect(params).to.be.deep.equal(defaultRes);
 
-                stationsType = countryStations.cleanParams({name: function(){}});
-                expect(stationsType).to.be.deep.equal({stationsType:[]});
+                params = countryStations.cleanParams({name: function(){}});
+                expect(params).to.be.deep.equal(defaultRes);
+            });
+
+        });
+
+        describe("fields", function(){
+            it("should add fields filters", function(){
+                var fields = [{"departement": ""}, {"commune": ""},
+                                {"uic": ""}, {"segment_drg": ""},
+                                {"region": ""},{"nombre_plateformes": ""},
+                                {"niveau_de_service": ""}, {"intitule_gare": ""},
+                                {"code_postal": ""}];
+
+                fields.forEach(function(elt){
+                    var expected = {};
+                    Object.assign(expected, defaultRes);
+                    expected.fields = elt;
+
+                    var params = countryStations.cleanParams({fields: elt});
+                    expect(params).to.be.deep.equal(expected);
+                });
+
+            });
+
+            it("should filter fields when unauthorized", function(){
+                var fields = [{departement: "my value"}, {segment_drg: "c"}];
+                var errors = [{dummy: "dummy"}, {yolo: "yolo"}];
+
+                fields.forEach(function(elt, index){
+                    var expected = {};
+                    Object.assign(expected, defaultRes);
+                    expected.fields = elt;
+
+                    var fieldsWithErrors = {};
+                    Object.assign(fieldsWithErrors, expected, errors[index]);
+                    var params = countryStations.cleanParams(fieldsWithErrors);
+                    expect(params).to.be.deep.equal(expected);
+                });
+
             });
         });
     });
