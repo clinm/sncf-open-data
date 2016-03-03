@@ -120,7 +120,7 @@ var countryStation = function(){
 
                 if(params.fields && Object.keys(params.fields).length != 0){
                     return Object.keys(params.fields).every(function(field){
-                        return elt.fields[field].match(params.fields[field]);
+                        return elt.fields[field] && elt.fields[field].match(params.fields[field]);
                     });
                 }
                 return true;

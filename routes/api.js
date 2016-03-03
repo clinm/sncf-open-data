@@ -9,7 +9,7 @@ exports.index = function(req, res){
 exports.stop_areas = function(req, res){
     var countryStations = require('../bin/countryStations');
 
-    countryStations.getResources({}, function(resource){
+    countryStations.getResources(req.body, function(resource){
         console.log("length: " + resource.length);
         res.send(resource);
     });
