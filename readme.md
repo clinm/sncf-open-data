@@ -17,15 +17,47 @@ directory. You just have to create a new **CONF.json** file from **CONF.json.def
 ## Credential
 In order to access the SNCF API, a key is needed. Here are the procedure
 
-- Register on [https://data.sncf.com/api](https://data.sncf.com/api) to get your key
+- Register on [https://data.sncf.com/api](https://data.sncf.com/api(FR/EN)) to get your key
 - Replace the KEY by your own private key
 
 # Running
 - Make sure to update the configuration file (see credential)
+- npm test
 - npm start
 
 Go to [localhost:3000](localhost:3000)
 
-# What you can see
+# Features
+## Station's filtering (/api/stop_areas)
+Parameters available for PUT request
+```javascript
+{ 
+    fields: { 
+        departement: 'Moselle',     // Department
+        commune: 'Metz',            // City
+        segment_drg: 'a',           // (1)
+        region: 'Lorraine',         // Region
+        nombre_plateformes: '1',    // Platform's number
+        intitule_gare: 'Metz Ville',// Station's title
+        code_postal: '57000'        // Postal code
+    },
+    name: 'gare de Metz-Ville'      // Station's name
+}
+```
 
-- All stations at [localhost:3000/stations](localhost:3000/stations)
+
+(1) segment_drg is a category. It can be either a, b or c (sometimes several at the same time in the data).
+What it means:
+
+- a: National
+- b: Regional
+- c: Local
+
+You can find out more about fields definition and full data 
+[here(FR)](https://ressources.data.sncf.com/explore/dataset/referentiel-gares-voyageurs/information/?disjunctive.nombre_plateformes).
+All parameters can be Javascript Regex.
+
+# What you can see
+One example is available at [localhost:3000/stations](localhost:3000/stations) once the server is running. You can
+filter the stations by using the form on the left. All inputs allows Regex expressions as defined 
+[here](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions).
