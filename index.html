@@ -2,55 +2,110 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Stations</title>
+
+    <link rel="stylesheet" href="public/foundation/foundation.min.css" />
+    <link rel="stylesheet" href="public/stylesheets/stations.css" />
+
     <link rel="stylesheet" href="public/leaflet/leaflet.css">
     <link rel="stylesheet" href="public/leaflet/markercluster/MarkerCluster.css">
     <link rel="stylesheet" href="public/leaflet/markercluster/MarkerCluster.Default.css">
-
 </head>
 <body>
-<h1>Display all stations recorded in the API</h1>
-<p>All records are stored in resources/stations/stations.json</p>
-<p>It takes time to retrieve them as there are more than 75000 lines !</p>
-<div id="map" style="width: 100%; height: 500px;"></div>
-
-
+<div class="row container">
+    <div class="alert callout" data-closable style="display:none;" id="no-stations-found">
+        <h5>No stations!</h5>
+        <p>The filters you gave are too restrictives. There are no stations matching your request.</p>
+        <button class="close-button" aria-label="Dismiss alert" type="button" data-close>
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <div class="medium-4 column">
+        <h2>Stations</h2>
+        <form onsubmit="filter(filters); return false;" bind-obj="filters" onreset="filters={};">
+            <div class="row">
+                <div class="medium-6 columns">
+                    <label>Station's title
+                        <input type="text" placeholder="Metz Ville" bind-val="fields.intitule_gare">
+                    </label>
+                </div>
+                <div class="medium-6 columns">
+                    <label>Station's name
+                        <input type="text" placeholder="gare de Metz-Ville" bind-val="name">
+                    </label>
+                </div>
+            </div>
+            <div class="row">
+                <div class="medium-6 columns">
+                    <label>Department
+                        <input type="text" placeholder="Moselle" bind-val="fields.departement">
+                    </label>
+                </div>
+                <div class="medium-6 columns">
+                    <label>Region
+                        <input type="text" placeholder="Lorraine" bind-val="fields.region">
+                    </label>
+                </div>
+            </div>
+            <div class="row">
+                <div class="medium-6 columns">
+                    <label>City
+                        <input type="text" placeholder="Metz" bind-val="fields.commune">
+                    </label>
+                </div>
+                <div class="medium-6 columns">
+                    <label>Postal code
+                        <input type="text" placeholder="57000" bind-val="fields.code_postal">
+                    </label>
+                </div>
+            </div>
+            <div class="row">
+                <div class="medium-6 columns">
+                    <label>Station's type
+                        <input type="text" placeholder="(a, b, c)" bind-val="fields.segment_drg">
+                    </label>
+                </div>
+                <div class="medium-6 columns">
+                    <label>Platform's number
+                        <input type="text" placeholder="(1, 2, 4)" bind-val="fields.nombre_plateformes">
+                    </label>
+                </div>
+            </div>
+            <div class="row">
+                <div class="medium-6 medium-offset-3 columns">
+                    <div class="expanded button-group">
+                        <button type="reset" class="warning button">Clear</button>
+                        <button type="submit" class="button">Filter</button>
+                    </div>
+                </div>
+                <img src="public/images/ajax-loader.gif" alt="Loading..." id="loading" style="display:none;">
+            </div>
+        </form>
+    </div>
+    <div class="medium-8 column panel-map">
+        <div id="map"></div>
+    </div>
+</div>
+<script src="public/javascripts/underscore-min.js"></script>
 <script src="public/leaflet/leaflet.js"></script>
 <script src="public/leaflet/markercluster/leaflet.markercluster.js"></script>
+<script src="public/javascripts/stations_display.js"></script>
+<script src="public/javascripts/jquery-1.12.1.min.js"></script>
+<script src="public/javascripts/foundation.min.js"></script>
 <script>
-    // set up the map
-    map = new L.map('map');
+    var filters = {};
 
-    // create the tile layer with correct attribution
-    var osmUrl='http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
-    var osmAttrib='Map data © <a href="http://openstreetmap.org">OpenStreetMap</a> contributors';
-    var osm = new L.TileLayer(osmUrl, {minZoom: 2, maxZoom: 12, attribution: osmAttrib});
+    var stations = display('map', 'no-stations-found', 'loading');
 
-    // roughly center of France
-    map.setView(new L.LatLng(46.6, 2.75), 5);
-    map.addLayer(osm);
+    function filter(args){
+        stations.getData(args);
+    }
 
-    var xmlhttp = new XMLHttpRequest();
-    var url = "./resources/stations/stations.json";
-
-    xmlhttp.onreadystatechange = function() {
-        var markerClusters = L.markerClusterGroup();
-
-        if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
-            var stations = JSON.parse(xmlhttp.responseText);
-
-            stations.forEach(function(stopArea){
-                var content = stopArea.name || "Undefined";
-                var m = L.marker(stopArea.coord).bindPopup(content);
-                markerClusters.addLayer(m);
-            });
-
-            map.addLayer(markerClusters);
-        }
-    };
-    xmlhttp.open("GET", url, true);
-    xmlhttp.send();
+    filter(filters);
 
 </script>
+<script src="public/javascripts/dataFormBinding.js"></script>
 </body>
 </html>
