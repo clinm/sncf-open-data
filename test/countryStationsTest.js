@@ -4,7 +4,7 @@
 var path = require("path");
 var fs = require("fs");
 var bin_directory = path.join(__dirname, "../bin");
-var CONF_FILE = path.join(bin_directory, 'remote-request', 'CONF.json');
+var CONF_FILE = path.join(__dirname, '../conf', 'CONF.json');
 var chai = require("chai");
 chai.use(require('chai-string'));
 var sinon = require("sinon");

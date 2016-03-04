@@ -2,7 +2,7 @@
  * Created by Matthieu on 10/02/2016.
  */
 var sncfRequest = function(){
-    var CONF= require("./CONF.json");
+    var CONF= require("./../../conf/CONF.json");
 
     var request = require('request');
     var _ = require("underscore");

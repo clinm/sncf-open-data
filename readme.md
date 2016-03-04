@@ -12,11 +12,12 @@ My current study allows me to learn cool stuff in statistics, intelligent system
 them on real time traffic with this project.
 
 # Getting started
+First of all, you need to make your own configuration file. There is a default configuration file available in the conf
+directory. You just have to create a new **CONF.json** file from **CONF.json.default** and you update the credential.
 ## Credential
 In order to access the SNCF API, a key is needed. Here are the procedure
 
 - Register on [https://data.sncf.com/api](https://data.sncf.com/api) to get your key
-- Create a new **CONF.json** from **CONF.empty.json**
 - Replace the KEY by your own private key
 
 # Running

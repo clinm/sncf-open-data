@@ -4,7 +4,7 @@
 
 var countryStation = function(){
 
-    var CONF = require('./remote-request/CONF.json');
+    var CONF = require('./../conf/CONF.json');
 
     var COUNTRY_BASE = 'stations';
 
