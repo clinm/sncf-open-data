@@ -61,7 +61,8 @@ var display = function(mapId, errorId, loadingId){
             }
 
             if(stations) {
-                var filtered = display.doFilter(filters, stations);
+                var afterClean = display.cleanParams(filters);
+                var filtered = display.doFilter(afterClean, stations);
                 display.updateOrError(filtered);
             }else{
                 var xmlhttp = new XMLHttpRequest();
@@ -69,7 +70,8 @@ var display = function(mapId, errorId, loadingId){
                 xmlhttp.onreadystatechange = function() {
                     if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
                         stations = JSON.parse(xmlhttp.responseText);
-                        var filtered = display.doFilter(filters, stations);
+                        var afterClean = display.cleanParams(filters);
+                        var filtered = display.doFilter(afterClean, stations);
                         display.updateOrError(filtered);
                     }
                 };
@@ -100,6 +102,49 @@ var display = function(mapId, errorId, loadingId){
             });
 
             map.addLayer(markerClusters);
+        },
+        cleanParams: function(params){
+            var cleanedParams = {fields: {}};
+
+            var checkRegex = function(expr){
+                var isValid = true;
+                try {
+                    // check wether the regex is correct to avoid
+                    // errors when performing the filtering
+                    new RegExp(expr);
+                } catch(e) {
+                    isValid = false;
+                }
+
+                return isValid;
+            };
+
+            if(params){
+                // name parameter
+                if(params.name && typeof params.name === 'string' && checkRegex(params.name)){
+                    cleanedParams.name = params.name;
+                }
+
+                if(params.fields){
+                    var fields = {};
+                    //fields that are strings
+                    var fieldsAllowedString = ["departement", "commune", "uic", "segment_drg", "region",
+                        "nombre_plateformes", "niveau_de_service", "intitule_gare", "code_postal"];
+
+                    fieldsAllowedString.forEach(function(elt){
+                        if(typeof params.fields[elt] === 'string'){
+                            if(checkRegex(params.fields[elt])){
+                                fields[elt] = params.fields[elt];
+                            }
+                        }
+                    });
+
+                    cleanedParams.fields = fields;
+                }
+
+            }
+
+            return cleanedParams;
         }
     };
 
