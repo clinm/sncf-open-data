@@ -341,6 +341,16 @@ describe("CountryStationsTest", function(){
                 });
 
             });
+
+            it("should not take incorrect regex for fields", function(){
+                var params = countryStations.cleanParams({fields: {departement: "#{\^[@"}});
+                expect(params.fields).to.be.deep.equal({});
+            });
+
+            it("should not take incorrect regex for name", function(){
+                var params = countryStations.cleanParams({name: "#{\^[@"});
+                expect(params).to.be.deep.equal({fields:{}, "stationsType": []});
+            })
         });
     });
 });

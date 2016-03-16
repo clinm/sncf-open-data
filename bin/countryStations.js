@@ -131,6 +131,19 @@ var countryStation = function(){
         cleanParams: function(params){
             var cleanedParams = {stationsType: [], fields: {}};
 
+            var checkRegex = function(expr){
+                var isValid = true;
+                try {
+                    // check wether the regex is correct to avoid
+                    // errors when performing the filtering
+                    new RegExp(expr);
+                } catch(e) {
+                    isValid = false;
+                }
+
+                return isValid;
+            };
+
             if(params){
                 if(params.stationsType){
                     //clean params.stationsType
@@ -143,7 +156,7 @@ var countryStation = function(){
                 }
 
                 // name parameters
-                if(params.name && typeof params.name === 'string'){
+                if(params.name && typeof params.name === 'string' && checkRegex(params.name)){
                     cleanedParams.name = params.name;
                 }
 
@@ -155,7 +168,9 @@ var countryStation = function(){
 
                     fieldsAllowedString.forEach(function(elt){
                         if(typeof params.fields[elt] === 'string'){
-                            fields[elt] = params.fields[elt];
+                            if(checkRegex(params.fields[elt])){
+                                fields[elt] = params.fields[elt];
+                            }
                         }
                     });
 
