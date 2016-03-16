@@ -12,22 +12,14 @@ var countryStation = function(){
     var _ = require("underscore");
     var sncf = require("./remote-request/sncf-request");
     var fs = require("fs");
-    var SEP = '_';
 
     var obj = {
         /**
          *  Construct the path to the resources given parameters
-         * @param {{stationsType: []} | {}}params use stationsType to create the path
          * @returns {string}
          */
-        getPath: function(params){
+        getPath: function(){
             var res = path.join(__dirname, '../', CONF.BASE_RESOURCES, COUNTRY_BASE, COUNTRY_BASE);
-            params = obj.cleanParams(params);
-            if(params.stationsType.length > 0){
-
-                var types = params.stationsType.join(SEP);
-                res = res + SEP + types;
-            }
             return res + '.json';
         },
         /**
@@ -40,7 +32,7 @@ var countryStation = function(){
         getResources: function(params, callback){
             params = obj.cleanParams(params);
 
-            var pathToResources = obj.getPath({});
+            var pathToResources = obj.getPath();
             if(fs.existsSync(pathToResources)){
                 var resource = require(pathToResources);
                 callback(obj.doFilter(params, resource));
@@ -129,7 +121,7 @@ var countryStation = function(){
             return resources;
         },
         cleanParams: function(params){
-            var cleanedParams = {stationsType: [], fields: {}};
+            var cleanedParams = {fields: {}};
 
             var checkRegex = function(expr){
                 var isValid = true;
@@ -145,17 +137,7 @@ var countryStation = function(){
             };
 
             if(params){
-                if(params.stationsType){
-                    //clean params.stationsType
-                    var args = _.intersection(params.stationsType, ['a', 'b', 'c']);
-
-                    args = _.unique(args).sort(function(a, b){
-                        return (a <= b)? (a < b)? -1: 0: 1;
-                    });
-                    cleanedParams.stationsType = args;
-                }
-
-                // name parameters
+                // name parameter
                 if(params.name && typeof params.name === 'string' && checkRegex(params.name)){
                     cleanedParams.name = params.name;
                 }

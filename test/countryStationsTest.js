@@ -58,25 +58,8 @@ describe("CountryStationsTest", function(){
 
     describe("getPath", function(){
         it("should return a path without parameters", function(){
-            //noinspection JSCheckFunctionSignatures
-            expect(countryStations.getPath({})).to.endsWith("stations.json");
+            expect(countryStations.getPath()).to.endsWith("stations.json");
             expect(countryStations.getPath({stationsType: []})).to.endsWith("stations.json");
-        });
-
-        it("should return the path with parameters", function(){
-            expect(countryStations.getPath({stationsType: ['a', 'b']})).to.endsWith("stations_a_b.json");
-        });
-
-        it("should not put twice the same arguments", function(){
-            expect(countryStations.getPath({stationsType: ['a', 'b', 'a']})).to.endsWith("stations_a_b.json");
-        });
-
-        it("should ignore unknown parameters", function(){
-            expect(countryStations.getPath({stationsType: ['a', 'b', 'unknown', 45]})).to.endsWith("stations_a_b.json");
-        });
-
-        it("should put parameters in alphabetical order", function(){
-            expect(countryStations.getPath({stationsType: ['b', 'a']})).to.endsWith("stations_a_b.json");
         });
     });
 
@@ -251,25 +234,7 @@ describe("CountryStationsTest", function(){
     });
 
     describe("cleanParams", function(){
-        var defaultRes  = {stationsType: [], fields: {}};
-
-        describe("stationsType", function(){
-            it("should not put twice the same arguments", function(){
-                var stationsType = countryStations.cleanParams({stationsType: ['a', 'b', 'a']}).stationsType;
-                expect(stationsType).to.be.deep.equal(['a', 'b']);
-            });
-
-            it("should ignore unknown parameters", function(){
-                var stationsType = countryStations.cleanParams({stationsType:['a', 'b', 'unknown', 45]}).stationsType;
-                expect(stationsType).to.be.deep.equal(['a', 'b']);
-            });
-
-            it("should put parameters in alphabetical order", function(){
-                var stationsType = countryStations.cleanParams({stationsType:['b', 'a']}).stationsType;
-                expect(stationsType).to.be.deep.equal(['a', 'b']);
-            });
-
-        });
+        var defaultRes  = {fields: {}};
 
         describe("unknown filters", function(){
             it("should not take unknown filters", function(){
@@ -349,7 +314,7 @@ describe("CountryStationsTest", function(){
 
             it("should not take incorrect regex for name", function(){
                 var params = countryStations.cleanParams({name: "#{\^[@"});
-                expect(params).to.be.deep.equal({fields:{}, "stationsType": []});
+                expect(params).to.be.deep.equal({fields:{}});
             })
         });
     });
